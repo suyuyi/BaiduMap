@@ -208,6 +208,7 @@ public class showmap extends Activity {
             @Override
             public void onClick(View v) {
 
+
             }
         });
         scan.setOnClickListener(new View.OnClickListener() {
