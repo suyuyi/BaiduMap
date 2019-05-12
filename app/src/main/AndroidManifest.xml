@@ -71,6 +71,18 @@
         <activity android:name=".showmap">
 
         </activity>
+        <activity android:name=".sendmessage">
+
+        </activity>
+        <activity android:name=".scandatabase">
+
+        </activity>
+        <activity android:name=".showcontentlist">
+
+        </activity>
+        <activity android:name=".sendcomment">
+
+        </activity>
     </application>
 
 </manifest>

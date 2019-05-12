@@ -59,8 +59,8 @@ public class MainActivity extends Activity {
     final int port=8088;
     static int success=1,fail=0;
     static int print_info=0,login_request=1,regi_request=2;
-    public LocationClient mLocationClient = null;
-    private MyLocationListener myListener = new MyLocationListener();
+//    public LocationClient mLocationClient = null;
+//    private MyLocationListener myListener = new MyLocationListener();
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {  //这个是发送过来的消息
@@ -105,29 +105,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Intent intent1 = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-//        intent1.setData(Uri.parse("package:" + getPackageName()));
-//        intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intent1);
-
-        mLocationClient = new LocationClient(getApplicationContext());
-        //声明LocationClient类
-        mLocationClient.registerLocationListener(myListener);
-        //注册监听函
-        LocationClientOption option = new LocationClientOption();
-//        option.setLocationMode(LocationMode.Hight_Accuracy);
-        option.setCoorType("bd09ll");
-        option.setScanSpan(1001);
-        option.setOpenGps(true);
-        option.setLocationNotify(true);
-        option.setIgnoreKillProcess(false);
-        option.SetIgnoreCacheException(false);
-        option.setWifiCacheTimeOut(5*60*1000);
-        option.setEnableSimulateGps(false);
-        mLocationClient.setLocOption(option);
-        mLocationClient.start();
-        //mLocationClient为第二步初始化过的LocationClient对象
-        //调用LocationClient的start()方法，便可发起定位请求
         setContentView(R.layout.log_reg);
         final EditText name=(EditText)findViewById(R.id.name);
         final EditText password=(EditText)findViewById(R.id.password);
