@@ -83,6 +83,9 @@
         <activity android:name=".sendcomment">
 
         </activity>
+        <activity android:name=".infolist">
+
+        </activity>
     </application>
 
 </manifest>

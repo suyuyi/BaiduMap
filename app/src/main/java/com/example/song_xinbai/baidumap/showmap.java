@@ -97,7 +97,7 @@ public class showmap extends Activity {
     private MyLocationListener myListener = new MyLocationListener();
     public BitmapDescriptor mbitmap=BitmapDescriptorFactory.fromResource(R.drawable.floating_test);
     public boolean isFirstLoc=true,send_or_text=false;
-    public int print_info=0,send_request=3,scan_request=4,read_request=5;
+    public int print_info=0,send_request=3,scan_request=4;
     public LinearLayout send_menu;
     private Handler handler = new Handler()
     {
@@ -129,7 +129,7 @@ public class showmap extends Activity {
                     for(int i=0;i<tmp.length;++i)
                     {//UserID,lat,lon,title,Content
                         //double lat,double lon,int userid,String title,String content
-                        String[] data=tmp[i].split(",");
+                        String[] data=tmp[i].split("~");//!attention!
                         locwithcontent mlocon=new locwithcontent(Double.parseDouble(data[1]),Double.parseDouble(data[2]),Integer.parseInt(data[0]),
                                 data[3],data[4]);
                         latLng = new LatLng(mlocon.la, mlocon.ln);
@@ -145,10 +145,6 @@ public class showmap extends Activity {
                     MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(latLng);
                     mBaiduMap.setMapStatus(u);
                 }
-
-            }
-            else if(what==read_request)
-            {
 
             }
         }
@@ -175,14 +171,6 @@ public class showmap extends Activity {
             {
                 //获得marker中的数据
                 locwithcontent mylocon = (locwithcontent) marker.getExtraInfo().get("locwithcontent");
-//                Message message = Message.obtain(handler);
-//                message.what = read_request;
-//                message.arg1 = 0;
-//                message.arg2 = 0;
-//                message.obj = mlocon;
-//                message.sendToTarget();
-//                locwithcontent mylocon =(locwithcontent) msg.obj;
-                //                Toast.makeText(showmap.this,"受到点击",Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent();
                 intent.setClass(showmap.this,showcontentlist.class);
                 Bundle bundle = new Bundle();
@@ -207,8 +195,13 @@ public class showmap extends Activity {
         info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
+                loc myloc=new loc(lat,lon,userID);
+                Intent intent = new Intent();
+                intent.setClass(showmap.this,infolist.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("location",myloc);
+                intent.putExtras(bundle);
+                startActivity(intent);
             }
         });
         scan.setOnClickListener(new View.OnClickListener() {
