@@ -11,11 +11,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+
 
 /**
  * @author Administrator
@@ -25,8 +28,10 @@ import java.net.Socket;
  * @updatedes ${TODO}
  */
 public class sendcomment extends Activity {
-    final String HOST="45.76.196.92";
-    final int port=8088;
+//    final String HOST="45.76.196.92";
+//    final int port=8088;
+    final String HOST=globaldata.getHOST();
+    final int port=globaldata.getPORT();
     public static int print_info=0,comment_request=6;
     private Handler handler = new Handler() {
         @Override
@@ -62,12 +67,12 @@ public class sendcomment extends Activity {
         send_comment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String c=content.getText().toString();
+                final String c=content.getText().toString();
                 if(c.length()==0)
                     Toast.makeText(sendcomment.this,"评论不能为空",Toast.LENGTH_SHORT).show();
                 else
                 {
-                    int targetID=mylocon.uid;
+                    final int targetID=mylocon.uid;
                     final String data=String.valueOf(comment_request)+'-'+targetID+'-'+c;
                     new Thread() {
                         public void run() {
@@ -76,7 +81,12 @@ public class sendcomment extends Activity {
                                 Socket socket = new Socket(HOST, port);
                                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                                 BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                                out.write(data);
+                                JSONObject inf = new JSONObject();
+                                inf.put("request",String.valueOf(comment_request));
+                                inf.put("uid",targetID);
+                                inf.put("content",c);
+                                out.write(String.valueOf(String.valueOf(inf).length()));
+                                out.write(String.valueOf(inf));
                                 out.flush();
                                 String[] res=in.readLine().split("/");
                                 Message message = Message.obtain(handler);

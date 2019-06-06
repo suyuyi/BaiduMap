@@ -25,8 +25,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.song_xinbai.baidumap.globaldata.login_request;
+import static com.example.song_xinbai.baidumap.globaldata.*;
 
 /**
  * @author Administrator
@@ -35,7 +34,7 @@ import static com.example.song_xinbai.baidumap.globaldata.login_request;
  * @updateauthor $Author$
  * @updatedes ${TODO}
  */
-public class infolist extends Activity {
+public class scanlist extends Activity {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
@@ -44,10 +43,10 @@ public class infolist extends Activity {
             int what = msg.what;
             String result =(String) msg.obj;
             if(what==print_info)
-                Toast.makeText(infolist.this,result,Toast.LENGTH_SHORT).show();
+                Toast.makeText(scanlist.this,result,Toast.LENGTH_SHORT).show();
             else if(what==read_request&&arg1==1&&arg2!=0)
             {
-                Toast.makeText(infolist.this,"载入完成",Toast.LENGTH_SHORT).show();
+                Toast.makeText(scanlist.this,"载入完成",Toast.LENGTH_SHORT).show();
                 List<titlepluscontent> listofcomment=new ArrayList<titlepluscontent>();
                 //id+title+content
                 int prev=0;
@@ -75,11 +74,12 @@ public class infolist extends Activity {
                         i=i+1;
                     }
                 }
-                myAdapter = new MyAdapter(infolist.this,listofcomment);
+                myAdapter = new scanAdapter(scanlist.this,listofcomment);
+                myAdapter=null;
                 listview.setAdapter(myAdapter);
             }
             else if(what==read_request&&arg1==1&&arg2==0)
-                Toast.makeText(infolist.this,"没有评论，抢一个沙发吧！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(scanlist.this,"没有评论，抢一个沙发吧！",Toast.LENGTH_SHORT).show();
             else if(what==delete_request)
             {
                 myAdapter.delete(arg1);
@@ -87,7 +87,7 @@ public class infolist extends Activity {
             }
         }
     };
-    public static MyAdapter myAdapter;
+    public static scanAdapter myAdapter;
     private ListView listview;
     final String HOST=globaldata.getHOST();
     final int port=globaldata.getPORT();
@@ -107,47 +107,24 @@ public class infolist extends Activity {
                     Socket socket = new Socket(HOST, port);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                    if(myloc.uid!=-1)
-                    {
-                        JSONObject inf = new JSONObject();
-                        inf.put("request",String.valueOf(read_request));
-                        inf.put("uid",myloc.uid);
-                        out.write(String.valueOf(String.valueOf(inf).length()));
-                        out.write(String.valueOf(inf));
-                        out.flush();
-                        Message message = Message.obtain(handler);
-                        message.what = read_request;
-                        String line;
-                        StringBuilder stringBuilder = new StringBuilder();
-                        while ((line = in.readLine()) != null)
-                            stringBuilder.append(line);
-                        String s=stringBuilder.toString();
-                        message.arg1 = 1;
-                        message.arg2 = 1;
-                        message.obj = s;
-                        message.sendToTarget();
-                        socket.close();
-                    }
-                    else
-                    {
-                        JSONObject inf = new JSONObject();
-                        inf.put("request",String.valueOf(admin_request));
-                        out.write(String.valueOf(String.valueOf(inf).length()));
-                        out.write(String.valueOf(inf));
-                        out.flush();
-                        Message message = Message.obtain(handler);
-                        message.what = read_request;
-                        String line;
-                        StringBuilder stringBuilder = new StringBuilder();
-                        while ((line = in.readLine()) != null)
-                            stringBuilder.append(line);
-                        String s=stringBuilder.toString();
-                        message.arg1 = 1;
-                        message.arg2 = 1;
-                        message.obj = s;
-                        message.sendToTarget();
-                        socket.close();
-                    }
+                    JSONObject inf = new JSONObject();
+                    inf.put("request",String.valueOf(admin_request));
+//                        inf.put("uid",myloc.uid);
+                    out.write(String.valueOf(String.valueOf(inf).length()));
+                    out.write(String.valueOf(inf));
+                    out.flush();
+                    Message message = Message.obtain(handler);
+                    message.what = read_request;
+                    String line;
+                    StringBuilder stringBuilder = new StringBuilder();
+                    while ((line = in.readLine()) != null)
+                        stringBuilder.append(line);
+                    String s=stringBuilder.toString();
+                    message.arg1 = 1;
+                    message.arg2 = 1;
+                    message.obj = s;
+                    message.sendToTarget();
+                    socket.close();
                 }
                 catch(Exception e)
                 {
@@ -162,13 +139,19 @@ public class infolist extends Activity {
             }
         }.start();
     }
-    private class MyAdapter extends BaseAdapter {
+    public class scanAdapter extends BaseAdapter {
         private LayoutInflater mInflater;
         private List<titlepluscontent> list;
-        public MyAdapter(Context context , List<titlepluscontent> list){
+        public scanAdapter(Context context , List<titlepluscontent> list){
             this.mInflater = LayoutInflater.from(context);
             this.list = list;
         }
+
+        public scanAdapter(scanlist context, List<com.example.song_xinbai.baidumap.titlepluscontent> listofcomment) {
+            this.mInflater = LayoutInflater.from(context);
+            this.list = list;
+        }
+
         @Override
         public int getCount() {
             // TODO Auto-generated method stub
@@ -192,7 +175,7 @@ public class infolist extends Activity {
 
             if (convertView == null) {
 
-                holder = new infolist.MyAdapter.ViewHolder();
+                holder = new scanlist.scanAdapter.ViewHolder();
                 convertView = mInflater.inflate(R.layout.infoitem, null);
                 holder.title = (TextView)convertView.findViewById(R.id.title);
                 holder.content = (TextView)convertView.findViewById(R.id.content);
@@ -257,18 +240,19 @@ public class infolist extends Activity {
             list.remove(position);
         }
 
-    }
-    public class titlepluscontent
-    {
-        public String title,content;
-        public int id,love,hate;
-        public titlepluscontent(String title,String content,int id,int love,int hate)
+        public class titlepluscontent
         {
-            this.title=title;
-            this.content=content;
-            this.id=id;
-            this.love=love;
-            this.hate=hate;
+            public String title,content;
+            public int id,love,hate;
+            public titlepluscontent(String title,String content,int id,int love,int hate)
+            {
+                this.title=title;
+                this.content=content;
+                this.id=id;
+                this.love=love;
+                this.hate=hate;
+            }
         }
+
     }
 }

@@ -21,6 +21,8 @@
     <!-- SD卡读取权限，用户写入离线定位数据-->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
         tools:ignore="ProtectedPermissions"></uses-permission>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!--//获取设备网络状态，禁用后无法获取网络状态-->
     <!--<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />-->
     <!--//网络权限，当禁用后，无法进行检索等相关业务-->
@@ -48,9 +50,9 @@
     <application
         android:name=".MyAppLication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/example"
+        android:label="漂流瓶"
+        android:roundIcon="@drawable/example"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <!-- 百度定位 开始 -->
@@ -84,6 +86,15 @@
 
         </activity>
         <activity android:name=".infolist">
+
+        </activity>
+        <activity android:name=".AdminLog">
+
+        </activity>
+        <activity android:name=".AdminWindow">
+
+        </activity>
+        <activity android:name=".scanlist">
 
         </activity>
     </application>

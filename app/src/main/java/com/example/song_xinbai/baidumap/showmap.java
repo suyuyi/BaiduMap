@@ -1,23 +1,16 @@
 package com.example.song_xinbai.baidumap;
 
 import android.app.Activity;
-import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.baidu.location.Poi;
-import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.Circle;
 import com.baidu.mapapi.map.CircleOptions;
-import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
@@ -25,59 +18,26 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
-
-import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.app.Application;
-import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
-import com.baidu.location.LocationClient;
-import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.SDKInitializer;
-import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
-import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.MyLocationData;
-import com.baidu.mapapi.model.LatLng;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.net.Socket;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
+import org.json.JSONObject;
 
-import java.util.List;
+import static com.example.song_xinbai.baidumap.globaldata.*;
 
 /**
  * @author Administrator
@@ -87,17 +47,18 @@ import java.util.List;
  * @updatedes ${TODO}
  */
 public class showmap extends Activity {
-    final String HOST="45.76.196.92";
-    final int port=8088;
+//    final String HOST="45.76.196.92";
+//    final int port=8088;
+    final String HOST=getHOST();
+    final int port=getPORT();
     private MapView mMapView = null;
     public static int userID=-1;
     public double lon,lat;
     private BaiduMap mBaiduMap;
     public LocationClient mLocationClient = null;
     private MyLocationListener myListener = new MyLocationListener();
-    public BitmapDescriptor mbitmap=BitmapDescriptorFactory.fromResource(R.drawable.floating_test);
+    public BitmapDescriptor mbitmap=BitmapDescriptorFactory.fromResource(R.drawable.example);
     public boolean isFirstLoc=true,send_or_text=false;
-    public int print_info=0,send_request=3,scan_request=4;
     public LinearLayout send_menu;
     private Handler handler = new Handler()
     {
@@ -121,7 +82,6 @@ public class showmap extends Activity {
                 {
                     Toast.makeText(showmap.this,"附近共有"+String.valueOf(arg1)+"个漂流瓶，正在加载，请稍候",Toast.LENGTH_SHORT).show();
                     String[] tmp=result.split("/");
-
                     mBaiduMap.clear();
                     LatLng latLng = null;
                     OverlayOptions overlayOptions = null;
@@ -163,7 +123,6 @@ public class showmap extends Activity {
         Button info=(Button)findViewById(R.id.info);
         Button scan=(Button)findViewById(R.id.scan);
         initLocation();
-
         mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener()
         {
             @Override
@@ -207,11 +166,20 @@ public class showmap extends Activity {
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(lat==4.9E-324||lon==4.9E-324)
+                {
+                    Message message = Message.obtain(handler);
+                    message.what = print_info;
+                    message.arg1 = 0;
+                    message.arg2 = 0;
+                    message.obj = "GPS定位失败，请重启GPS，此次定位将使用之前的历史位置";
+                    message.sendToTarget();
+                }
                 mBaiduMap.clear();
                 CircleOptions circleOptions = new CircleOptions();
                 // 2.设置数据 以世界之窗为圆心，1000米为半径绘制
                 circleOptions.center(new LatLng(lat, lon))//中心
-                        .radius(3)  //半径
+                        .radius(10)  //半径
                         .fillColor(0x60FF0000)//填充圆的颜色
                         .stroke(new Stroke(10, 0x600FF000));  //边框的宽度和颜色
                 //把绘制的圆添加到百度地图上去
@@ -220,8 +188,6 @@ public class showmap extends Activity {
                 MapStatus.Builder builder = new MapStatus.Builder();
                 //设置缩放中心点；缩放比例；
                 builder.target(ll).zoom(18.0f);
-                //给地图设置状态
-                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
                 new Thread() {
                     public void run() {
                         try {
@@ -229,9 +195,12 @@ public class showmap extends Activity {
                             Socket socket = new Socket(HOST, port);
                             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                            //lat_lon
-                            String data = String.valueOf(scan_request) + "-" + lat + "-" + lon;
-                            out.write(data);
+                            JSONObject inf = new JSONObject();
+                            inf.put("request",String.valueOf(scan_request));
+                            inf.put("lon",lon);
+                            inf.put("lat",lat);
+                            out.write(String.valueOf(String.valueOf(inf).length()));
+                            out.write(String.valueOf(inf));
                             out.flush();
                             Message message = Message.obtain(handler);
                             message.what = scan_request;
@@ -253,6 +222,15 @@ public class showmap extends Activity {
                     }
                     //启动线程
                 }.start();
+                //给地图设置状态
+//                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+//                loc myloc=new loc(lat,lon,userID);
+//                Intent intent = new Intent();
+//                intent.setClass(showmap.this,scanlist.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putSerializable("location",myloc);
+//                intent.putExtras(bundle);
+//                startActivity(intent);
             }
         });
 
@@ -278,19 +256,17 @@ public class showmap extends Activity {
     public class MyLocationListener extends BDAbstractLocationListener {
         @Override
         public void onReceiveLocation(BDLocation location){
-            lat = location.getLatitude();    //获取纬度信息
-            lon = location.getLongitude();    //获取经度信息
+            if(location.getLatitude()!=4.9E-324&&location.getLongitude()!=4.9E-324)
+            {
+                lat = location.getLatitude();    //获取纬度信息
+                lon = location.getLongitude();    //获取经度信息
+            }
             float radius = location.getRadius();    //获取定位精度，默认值为0.0f
-            System.out.println(lon);
-            System.out.println(lat);
             String coorType = location.getCoorType();
             int errorCode = location.getLocType();
-//            CircleOptions mycircleoptions = new CircleOptions();//参数设置类
-//            mycircleoptions.center(new LatLng(lat,lon));//marker坐标位置
-//            mycircleoptions.fillColor(87);
-//            mycircleoptions.radius(10000);
-//            mycircleoptions.visible(true);
-//            Circle mycircle=(Circle) mBaiduMap.addOverlay(mycircleoptions);
+//            System.out.print("lat:"+lat+'\n');
+//            System.out.print("lon:"+lon+'\n');
+//            System.out.print("err:"+errorCode+'\n');
             if (isFirstLoc) {
                 isFirstLoc = false;
                 LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
@@ -306,13 +282,6 @@ public class showmap extends Activity {
                         .fillColor(0x60FF0000)//填充圆的颜色
                         .stroke(new Stroke(10, 0x600FF000));  //边框的宽度和颜色
                 mBaiduMap.addOverlay(circleOptions);
-//                markerOptions.icon(mbitmap);//marker图标，可以自定义
-//                markerOptions.draggable(false);//是否可拖拽，默认不可拖拽
-//                markerOptions.anchor(0.5f, 1.0f);//设置 marker覆盖物与位置点的位置关系，默认（0.5f, 1.0f）水平居中，垂直下对齐
-//                markerOptions.alpha(0.8f);//marker图标透明度，0~1.0，默认为1.0
-//                markerOptions.animateType(MarkerOptions.MarkerAnimateType.none);//marker出现的方式，从天上掉下
-//                markerOptions.flat(false);//marker突变是否平贴地面
-//                Marker mMarker = (Marker) mBaiduMap.addOverlay(markerOptions);
             }
         }
     }

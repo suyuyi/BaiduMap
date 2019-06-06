@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@android:dimen/notification_large_icon_height"
         android:layout_weight="0.2"
         android:orientation="horizontal">
 
@@ -18,10 +18,18 @@
             android:text="TextView" />
 
         <Button
+            android:id="@+id/头条"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:text="头条" />
+
+        <Button
             android:id="@+id/delete"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="3"
+            android:layout_weight="1"
             android:text="删除" />
     </LinearLayout>
 

@@ -2,65 +2,34 @@ package com.example.song_xinbai.baidumap;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.app.Application;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
-import com.baidu.location.LocationClient;
-import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.CoordType;
-import com.baidu.mapapi.SDKInitializer;
-import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.MapStatus;
-import com.baidu.mapapi.map.MapStatusUpdate;
-import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.MyLocationData;
-import com.baidu.mapapi.model.LatLng;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
+import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
+import static com.example.song_xinbai.baidumap.globaldata.*;
 
 public class MainActivity extends Activity {
     private MapView mMapView = null;
-    final String HOST="45.76.196.92";
-    final int port=8088;
+    final String HOST=globaldata.getHOST();
+    final int port=globaldata.getPORT();
     static int success=1,fail=0;
-    static int print_info=0,login_request=1,regi_request=2;
-//    public LocationClient mLocationClient = null;
-//    private MyLocationListener myListener = new MyLocationListener();
+    int adminlog;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {  //这个是发送过来的消息
@@ -84,9 +53,9 @@ public class MainActivity extends Activity {
                 else if(arg1==fail)
                 {
                     if(arg2==-1)
-                        Toast.makeText(MainActivity.this,"用户名不存在"+result,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this,"用户名不存在",Toast.LENGTH_SHORT).show();
                     else if(arg2==-2)
-                        Toast.makeText(MainActivity.this,"密码错误"+result,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this,"密码错误",Toast.LENGTH_SHORT).show();
                 }
                 else
                     Toast.makeText(MainActivity.this,"读取失败",Toast.LENGTH_SHORT).show();
@@ -94,9 +63,9 @@ public class MainActivity extends Activity {
             else if(what==regi_request)
             {
                 if(arg1==success)
-                    Toast.makeText(MainActivity.this,"注册成功"+String.valueOf(arg2),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"注册成功",Toast.LENGTH_SHORT).show();
                 else if(arg1==fail)
-                    Toast.makeText(MainActivity.this,"用户名已存在"+result,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"用户名已存在",Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(MainActivity.this,"读取失败",Toast.LENGTH_SHORT).show();
             }
@@ -105,11 +74,28 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        adminlog=0;
         setContentView(R.layout.log_reg);
         final EditText name=(EditText)findViewById(R.id.name);
         final EditText password=(EditText)findViewById(R.id.password);
         Button login=(Button) findViewById(R.id.loin);
         Button reg=(Button) findViewById(R.id.regi);
+        Button admin_log=(Button) findViewById(R.id.admin_log);
+        admin_log.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(adminlog==9)
+                {
+                    //admin login
+                    Intent intent = new Intent();
+                    intent.setClass(MainActivity.this,AdminLog.class);
+                    startActivity(intent);
+                }
+                else {
+                    adminlog=adminlog+1;
+                }
+            }
+        });
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,17 +111,24 @@ public class MainActivity extends Activity {
                                 Socket socket = new Socket(HOST, port);
                                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                                 BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                                String data = String.valueOf(login_request) + "-" + username + "-" + userpwd;
-                                out.write(data);
+                                JSONObject inf = new JSONObject();
+                                inf.put("request",String.valueOf(login_request));
+                                inf.put("username",username);
+                                inf.put("userpwd",userpwd);
+                                out.write(String.valueOf(String.valueOf(inf).length()));
+                                out.write(String.valueOf(inf));
                                 out.flush();
                                 Message message = Message.obtain(handler);
                                 message.what = login_request;
-                                message.arg1 = 0;
-                                message.arg2 = 0;
-                                String[] res = in.readLine().split("/");
-                                message.arg1 = Integer.parseInt(res[0]);
-                                message.arg2 = Integer.parseInt(res[1]);
-                                message.obj = "nothing";
+                                String line;
+                                StringBuilder stringBuilder = new StringBuilder();
+                                while ((line = in.readLine()) != null)
+                                    stringBuilder.append(line);
+                                JSONObject res = new JSONObject(stringBuilder.toString());
+//                                System.out.println(res);
+                                message.arg1 = res.getInt("result");
+                                message.arg2 = res.getInt("real_userid");
+                                message.obj = "";
                                 message.sendToTarget();
                                 socket.close();
                             } catch (Exception e) {
@@ -168,17 +161,22 @@ public class MainActivity extends Activity {
                                 Socket socket = new Socket(HOST, port);
                                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                                 BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                                String data = String.valueOf(regi_request) + "-" + username + "-" + userpwd;
-                                out.write(data);
+                                JSONObject inf = new JSONObject();
+                                inf.put("request",String.valueOf(regi_request));
+                                inf.put("username",username);
+                                inf.put("userpwd",userpwd);
+                                out.write(String.valueOf(String.valueOf(inf).length()));
+                                out.write(String.valueOf(inf));
                                 out.flush();
                                 Message message = Message.obtain(handler);
                                 message.what = regi_request;
-                                message.arg1 = 0;
-                                message.arg2 = 0;
-                                String[] res = in.readLine().split("/");
-                                message.arg1 = Integer.parseInt(res[0]);
-                                message.arg2 = Integer.parseInt(res[1]);
-                                message.obj = "nothing";
+                                String line;
+                                StringBuilder stringBuilder = new StringBuilder();
+                                while ((line = in.readLine()) != null)
+                                    stringBuilder.append(line);
+                                JSONObject res = new JSONObject(stringBuilder.toString());
+                                message.arg1 = res.getInt("result");
+                                message.obj = "";
                                 message.sendToTarget();
                                 socket.close();
                             } catch (Exception e) {
@@ -207,18 +205,21 @@ public class MainActivity extends Activity {
         super.onResume();
         //在activity执行onResume时执行mMapView. onResume ()，实现地图生命周期管理
 //        mMapView.onResume();
+        adminlog=0;
     }
     @Override
     protected void onPause() {
         super.onPause();
         //在activity执行onPause时执行mMapView. onPause ()，实现地图生命周期管理
 //        mMapView.onPause();
+        adminlog=0;
     }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         //在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
 //        mMapView.onDestroy();
+        adminlog=0;
     }
 
     public class MyLocationListener extends BDAbstractLocationListener {
@@ -237,9 +238,9 @@ public class MainActivity extends Activity {
 
             int errorCode = location.getLocType();
             //获取定位类型、定位错误返回码，具体信息可参照类参考中BDLocation类中的说明
-            System.out.println(latitude);
-            System.out.println(longitude);
-            System.out.println(errorCode);
+//            System.out.println(latitude);
+//            System.out.println(longitude);
+//            System.out.println(errorCode);
         }
     }
 }

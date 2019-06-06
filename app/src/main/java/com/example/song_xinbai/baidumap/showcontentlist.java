@@ -16,6 +16,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -24,6 +26,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.example.song_xinbai.baidumap.globaldata.login_request;
 
 /**
  * @author Administrator
@@ -34,8 +38,8 @@ import java.util.Map;
  */
 public class showcontentlist extends Activity {
     private ListView listview;
-    final String HOST="45.76.196.92";
-    final int port=8088;
+    final String HOST=globaldata.getHOST();
+    final int port=globaldata.getPORT();
     public static int print_info=0,comment_list_request=7,like_request=8,dislike_request=9;
     public boolean liked=false,disliked=false;
     private Handler handler = new Handler() {
@@ -67,6 +71,7 @@ public class showcontentlist extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.out.println("OK");
         setContentView(R.layout.item_maker);
         Intent intent =getIntent();
         final Bundle bundle = intent.getExtras();
@@ -86,8 +91,11 @@ public class showcontentlist extends Activity {
                     Socket socket = new Socket(HOST, port);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                    String data=String.valueOf(comment_list_request)+'-'+String.valueOf(mylocon.uid);
-                    out.write(data);
+                    JSONObject inf = new JSONObject();
+                    inf.put("request",String.valueOf(comment_list_request));
+                    inf.put("uid",String.valueOf(mylocon.uid));
+                    out.write(String.valueOf(String.valueOf(inf).length()));
+                    out.write(String.valueOf(inf));
                     out.flush();
                     Message message = Message.obtain(handler);
                     message.what = comment_list_request;
@@ -114,12 +122,12 @@ public class showcontentlist extends Activity {
         comment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent new_intent = new Intent();
-                new_intent.setClass(showcontentlist.this,sendcomment.class);
-                Bundle new_bundle = new Bundle();
-                new_bundle.putSerializable("locwithcontent",mylocon);
-                new_intent.putExtras(new_bundle);
-                startActivity(new_intent);
+//                Intent new_intent = new Intent();
+//                new_intent.setClass(showcontentlist.this,sendcomment.class);
+//                Bundle new_bundle = new Bundle();
+//                new_bundle.putSerializable("locwithcontent",mylocon);
+//                new_intent.putExtras(new_bundle);
+//                startActivity(new_intent);
             }
         });
         like.setOnClickListener(new View.OnClickListener() {
@@ -130,20 +138,23 @@ public class showcontentlist extends Activity {
                     new Thread() {
                         public void run() {
                             try {
-                                String data=String.valueOf(like_request)+'-'+String.valueOf(mylocon.uid);
-                                Socket socket = new Socket(HOST, port);
-                                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                                out.write(data);
-                                out.flush();
-                                liked=true;
-                                socket.close();
-                                Message message = Message.obtain(handler);
-                                message.what = like_request;
-                                message.arg1 = 0;
-                                message.arg2 = 0;
-                                message.obj = "finish";
-                                message.sendToTarget();
+//                                Socket socket = new Socket(HOST, port);
+//                                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//                                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+//                                JSONObject inf = new JSONObject();
+//                                inf.put("request",String.valueOf(like_request));
+//                                inf.put("uid",String.valueOf(mylocon.uid));
+//                                out.write(String.valueOf(String.valueOf(inf).length()));
+//                                out.write(String.valueOf(inf));
+//                                out.flush();
+//                                liked=true;
+//                                socket.close();
+//                                Message message = Message.obtain(handler);
+//                                message.what = like_request;
+//                                message.arg1 = 0;
+//                                message.arg2 = 0;
+//                                message.obj = "finish";
+//                                message.sendToTarget();
                             }
                             catch(Exception e)
                             {
@@ -171,20 +182,23 @@ public class showcontentlist extends Activity {
                     new Thread() {
                         public void run() {
                             try {
-                                String data=String.valueOf(dislike_request)+'-'+String.valueOf(mylocon.uid);
-                                Socket socket = new Socket(HOST, port);
-                                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                                out.write(data);
-                                out.flush();
-                                disliked=true;
-                                socket.close();
-                                Message message = Message.obtain(handler);
-                                message.what = dislike_request;
-                                message.arg1 = 0;
-                                message.arg2 = 0;
-                                message.obj = "finish";
-                                message.sendToTarget();
+//                                Socket socket = new Socket(HOST, port);
+//                                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//                                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+//                                JSONObject inf = new JSONObject();
+//                                inf.put("request",String.valueOf(like_request));
+//                                inf.put("uid",String.valueOf(mylocon.uid));
+//                                out.write(String.valueOf(String.valueOf(inf).length()));
+//                                out.write(String.valueOf(inf));
+//                                out.flush();
+//                                disliked=true;
+//                                socket.close();
+//                                Message message = Message.obtain(handler);
+//                                message.what = dislike_request;
+//                                message.arg1 = 0;
+//                                message.arg2 = 0;
+//                                message.obj = "finish";
+//                                message.sendToTarget();
                             }
                             catch(Exception e)
                             {

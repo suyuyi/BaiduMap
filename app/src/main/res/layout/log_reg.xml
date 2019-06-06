@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/admin_log"
+        android:layout_width="match_parent"
+        android:layout_height="@android:dimen/thumbnail_height"
+        android:background="@drawable/background" />
 
     <EditText
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
         android:ems="10"
         android:hint="请输入您的ID(仅限8位以内数字)"
         android:inputType="textPersonName"
@@ -18,34 +25,35 @@
         android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/name"
-        android:layout_alignLeft="@+id/name"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="156dp"
         android:ems="10"
-        android:hint="请输入您的密码(仅限8位以内数字)"
-        android:inputType="numberPassword"
-        android:paddingLeft="0dp"
-        android:paddingRight="0dp"
+        android:hint="请输入您的密码(10位以内)"
+        android:inputType="textPassword"
         android:text="123456" />
 
-    <Button
-        android:id="@+id/loin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/name"
-        android:layout_alignLeft="@+id/name"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="190dp"
-        android:text="登录" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/regi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/name"
-        android:layout_alignRight="@+id/name"
-        android:layout_alignBottom="@+id/loin"
-        android:text="注册" />
+        <Button
+            android:id="@+id/regi"
+            android:layout_width="@android:dimen/notification_large_icon_width"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:text="注册" />
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/loin"
+            android:layout_width="@android:dimen/notification_large_icon_width"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:gravity="center"
+            android:text="登录"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

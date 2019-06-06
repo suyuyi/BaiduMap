@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -7,27 +8,54 @@
     <EditText
         android:id="@+id/title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.01"
+        android:layout_height="@android:dimen/notification_large_icon_height"
         android:ems="10"
         android:hint="请输入标题"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:text="test" />
 
     <EditText
         android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_height="@android:dimen/thumbnail_height"
         android:ems="10"
         android:gravity="top"
         android:hint="请输入内容(255字以内)"
         android:inputType="text|textPersonName"
-        android:singleLine="false" />
+        android:singleLine="false"
+        android:text="test" />
+
+    <ImageView
+        android:id="@+id/imageplay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.9"
+        android:background="@color/colorAccent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@android:dimen/notification_large_icon_height"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="@android:dimen/notification_large_icon_height"
+            android:layout_weight="1"
+            android:text="选择图片" />
+
+        <Button
+            android:id="@+id/showimage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="显示图片" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/msend"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.01"
+        android:layout_height="50dp"
         android:text="发送" />
+
 </LinearLayout>

@@ -26,8 +26,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.song_xinbai.baidumap.globaldata.login_request;
-
 /**
  * @author Administrator
  * @des ${TODO}
@@ -35,7 +33,7 @@ import static com.example.song_xinbai.baidumap.globaldata.login_request;
  * @updateauthor $Author$
  * @updatedes ${TODO}
  */
-public class infolist extends Activity {
+public class AdminWindow extends Activity {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
@@ -44,15 +42,14 @@ public class infolist extends Activity {
             int what = msg.what;
             String result =(String) msg.obj;
             if(what==print_info)
-                Toast.makeText(infolist.this,result,Toast.LENGTH_SHORT).show();
-            else if(what==read_request&&arg1==1&&arg2!=0)
+                Toast.makeText(AdminWindow.this,result,Toast.LENGTH_SHORT).show();
+            else if(what==admin_request&&arg1==1&&arg2!=0)
             {
-                Toast.makeText(infolist.this,"载入完成",Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminWindow.this,"载入完成",Toast.LENGTH_SHORT).show();
                 List<titlepluscontent> listofcomment=new ArrayList<titlepluscontent>();
                 //id+title+content
                 int prev=0;
-                int i=0,cnt=0;
-                System.out.println(result);
+                int i=0;
                 while(i<result.length())
                 {
                     if(result.charAt(i)=='{')
@@ -65,21 +62,25 @@ public class infolist extends Activity {
                             prev=i+len;
                             titlepluscontent t=new titlepluscontent(target.getString("title"),target.getString("content"),target.getInt("id"),target.getInt("love"),target.getInt("hate"));
                             listofcomment.add(t);
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         i=i+len;
+                        System.out.println(i);
                     }
                     else
                     {
                         i=i+1;
                     }
                 }
-                myAdapter = new MyAdapter(infolist.this,listofcomment);
+                System.out.println("OK1");
+                myAdapter = new MyAdapter(AdminWindow.this,listofcomment);
+                System.out.println("OK2");
                 listview.setAdapter(myAdapter);
+                System.out.println("OK3");
             }
             else if(what==read_request&&arg1==1&&arg2==0)
-                Toast.makeText(infolist.this,"没有评论，抢一个沙发吧！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminWindow.this,"没有评论，抢一个沙发吧！",Toast.LENGTH_SHORT).show();
             else if(what==delete_request)
             {
                 myAdapter.delete(arg1);
@@ -91,15 +92,12 @@ public class infolist extends Activity {
     private ListView listview;
     final String HOST=globaldata.getHOST();
     final int port=globaldata.getPORT();
-    public static int print_info=0,read_request=5,delete_request=10,admin_request=13;
+    public static int print_info=0,read_request=5,delete_request=10,admin_request=13,top_request=14;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.selfinfo);
         listview=(ListView)findViewById(R.id.listofinfo);
-        Intent intent =getIntent();
-        Bundle bundle = intent.getExtras();
-        final loc myloc = (loc) bundle.get("location");
         new Thread() {
             public void run() {
                 try {
@@ -107,47 +105,23 @@ public class infolist extends Activity {
                     Socket socket = new Socket(HOST, port);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                    if(myloc.uid!=-1)
-                    {
-                        JSONObject inf = new JSONObject();
-                        inf.put("request",String.valueOf(read_request));
-                        inf.put("uid",myloc.uid);
-                        out.write(String.valueOf(String.valueOf(inf).length()));
-                        out.write(String.valueOf(inf));
-                        out.flush();
-                        Message message = Message.obtain(handler);
-                        message.what = read_request;
-                        String line;
-                        StringBuilder stringBuilder = new StringBuilder();
-                        while ((line = in.readLine()) != null)
-                            stringBuilder.append(line);
-                        String s=stringBuilder.toString();
-                        message.arg1 = 1;
-                        message.arg2 = 1;
-                        message.obj = s;
-                        message.sendToTarget();
-                        socket.close();
-                    }
-                    else
-                    {
-                        JSONObject inf = new JSONObject();
-                        inf.put("request",String.valueOf(admin_request));
-                        out.write(String.valueOf(String.valueOf(inf).length()));
-                        out.write(String.valueOf(inf));
-                        out.flush();
-                        Message message = Message.obtain(handler);
-                        message.what = read_request;
-                        String line;
-                        StringBuilder stringBuilder = new StringBuilder();
-                        while ((line = in.readLine()) != null)
-                            stringBuilder.append(line);
-                        String s=stringBuilder.toString();
-                        message.arg1 = 1;
-                        message.arg2 = 1;
-                        message.obj = s;
-                        message.sendToTarget();
-                        socket.close();
-                    }
+                    JSONObject inf = new JSONObject();
+                    inf.put("request",String.valueOf(admin_request));
+                    out.write(String.valueOf(String.valueOf(inf).length()));
+                    out.write(String.valueOf(inf));
+                    out.flush();
+                    Message message = Message.obtain(handler);
+                    message.what = admin_request;
+                    String line;
+                    StringBuilder stringBuilder = new StringBuilder();
+                    while ((line = in.readLine()) != null)
+                        stringBuilder.append(line);
+                    String s=stringBuilder.toString();
+                    message.arg1 = 1;
+                    message.arg2 = 1;
+                    message.obj = s;
+                    message.sendToTarget();
+                    socket.close();
                 }
                 catch(Exception e)
                 {
@@ -162,7 +136,7 @@ public class infolist extends Activity {
             }
         }.start();
     }
-    private class MyAdapter extends BaseAdapter {
+    public class MyAdapter extends BaseAdapter {
         private LayoutInflater mInflater;
         private List<titlepluscontent> list;
         public MyAdapter(Context context , List<titlepluscontent> list){
@@ -192,21 +166,22 @@ public class infolist extends Activity {
 
             if (convertView == null) {
 
-                holder = new infolist.MyAdapter.ViewHolder();
-                convertView = mInflater.inflate(R.layout.infoitem, null);
+                holder = new AdminWindow.MyAdapter.ViewHolder();
+                convertView = mInflater.inflate(R.layout.adminitem, null);
                 holder.title = (TextView)convertView.findViewById(R.id.title);
                 holder.content = (TextView)convertView.findViewById(R.id.content);
                 holder.delete=(Button)convertView.findViewById(R.id.delete);
                 holder.cnt_likes=(TextView)convertView.findViewById(R.id.cnt_likes);
                 holder.cnt_comments=(TextView)convertView.findViewById(R.id.cnt_comment);
+                holder.top=(Button)convertView.findViewById(R.id.top);
                 convertView.setTag(holder);
             }else{
                 holder = (ViewHolder)convertView.getTag();
             }
             holder.title.setText("标题："+list.get(position).title);
             holder.content.setText("内容："+list.get(position).content);
-            holder.cnt_likes.setText("喜爱："+list.get(position).love);
-            holder.cnt_comments.setText("举报："+list.get(position).hate);
+            holder.cnt_likes.setText("喜爱："+String.valueOf(list.get(position).love));
+            holder.cnt_comments.setText("举报："+String.valueOf(list.get(position).hate));
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -241,6 +216,44 @@ public class infolist extends Activity {
                         }
                     }.start();
 
+
+                }
+            });
+            holder.top.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new Thread() {
+                        public void run() {
+                            try {
+                                //创建客户端对象
+                                Socket socket = new Socket(HOST, port);
+                                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                                String data=String.valueOf(top_request)+'-'+String.valueOf(list.get(position).id);
+                                out.write(data);
+                                out.flush();
+                                Message message = Message.obtain(handler);
+                                message.what = delete_request;
+                                message.arg1 = position;
+                                message.arg2 = 0;
+                                message.obj = "deleted";
+                                message.sendToTarget();
+                                socket.close();
+                            }
+                            catch(Exception e)
+                            {
+                                Message message = Message.obtain(handler);
+                                message.what = print_info;
+                                message.arg1 = 0;
+                                message.arg2 = 0;
+                                message.obj = "服务器连接失败";
+                                message.sendToTarget();
+                                e.printStackTrace();
+                            }
+                        }
+                    }.start();
+
+
                 }
             });
             return convertView;
@@ -249,7 +262,7 @@ public class infolist extends Activity {
 
         public final class ViewHolder{
             public TextView title,content,cnt_likes,cnt_comments;
-            public Button delete;
+            public Button delete,top;
         }
 
         public void delete(int position)
